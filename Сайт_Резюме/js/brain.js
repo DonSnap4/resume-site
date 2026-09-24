@@ -17,20 +17,27 @@
     while (pts.length < count && tries < count * 40) {
       tries++;
       // Случайная точка в ограничивающем прямоугольнике мозга
-      var x = (Math.random() * 2 - 1) * scale * 1.12;
-      var y = (Math.random() * 2 - 1) * scale * 0.86;
+      var x = (Math.random() * 2 - 1) * scale * 1.10;
+      var y = (Math.random() * 2 - 1) * scale * 0.95;
       var nx = x / scale, ny = y / scale;
       var ok = false;
 
-      // Заполненный силуэт мозга: два округлых полушария, мозжечок и ствол.
-      var lobeA = (nx * nx) / (0.82 * 0.82) + ((ny + 0.08) * (ny + 0.08)) / (0.68 * 0.68) <= 1;
-      var lobeB = ((nx + 0.42) * (nx + 0.42)) / (0.58 * 0.58) + ((ny + 0.12) * (ny + 0.12)) / (0.62 * 0.62) <= 1;
-      var lobeC = ((nx - 0.42) * (nx - 0.42)) / (0.58 * 0.58) + ((ny + 0.12) * (ny + 0.12)) / (0.62 * 0.62) <= 1;
-      var stem = nx > 0.10 && nx < 0.42 && ny > 0.42 && ny < 0.92;
-      var cerebellum = ((nx - 0.42) * (nx - 0.42)) / (0.28 * 0.28) + ((ny - 0.52) * (ny - 0.52)) / (0.22 * 0.22) <= 1;
-      var gyri = Math.sin(nx * 12) + Math.cos(ny * 10 + nx * 4);
-      var ok = lobeA || lobeB || lobeC || stem || cerebellum;
-      if (ok && gyri < -0.35) ok = false;
+      // Силуэт мозга в профиль: полушарие, лобная и теменная доли,
+      // височная доля, мозжечок и ствол — как на анатомической схеме.
+      var mx = nx * 0.92, my = ny * 0.92;
+      function ell(cx2, cy2, rx, ry) {
+        var ex = (mx - cx2) / rx, ey = (my - cy2) / ry;
+        return ex * ex + ey * ey <= 1;
+      }
+      var cerebrum = Math.pow(Math.abs(mx + 0.12) / 0.88, 4) + Math.pow(Math.abs(my + 0.02) / 0.62, 4) <= 1;
+      var frontal = ell(-0.70, -0.14, 0.42, 0.42);
+      var temporal = ell(-0.42, 0.42, 0.34, 0.28);
+      var occipital = ell(0.50, 0.02, 0.44, 0.50);
+      var cerebellum = ell(0.62, 0.46, 0.30, 0.24);
+      var stem = mx > 0.26 && mx < 0.46 && my > 0.50 && my < 0.95;
+      var gyri = Math.sin(mx * 7 + my * 3) + Math.cos(my * 8 - mx * 2);
+      var ok = cerebrum || frontal || temporal || occipital || cerebellum || stem;
+      if (ok && gyri < -1.6) ok = false;
       if (ok) {
         pts.push({
           hx: cx + x, hy: cy + y,
