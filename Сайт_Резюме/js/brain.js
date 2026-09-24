@@ -10,8 +10,9 @@
   function makeBrainPoints(w, h, count) {
     // Мозг в профиль: два «полушария» (эллипс + волны извилин), мозжечок, ствол.
     var pts = [];
-    var cx = w * 0.5, cy = h * 0.5;
-    var scale = Math.min(w, h) * 0.42;
+    var cx = w * 0.5, cy = h * 0.42;
+    // Размер мозга держим умеренным: он фон, а не заливка экрана
+    var scale = Math.min(w * 0.17, h * 0.30);
     var tries = 0;
     while (pts.length < count && tries < count * 40) {
       tries++;
@@ -111,14 +112,18 @@
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.globalAlpha = 0.85;
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, -s);
         ctx.lineTo(s * 0.8, s * 0.7);
         ctx.lineTo(-s * 0.8, s * 0.7);
         ctx.closePath();
+        // Мягкая заливка делает силуэт мозга читаемым, контур даёт «стеклянность»
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 0.9;
         ctx.stroke();
         ctx.restore();
       }
