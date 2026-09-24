@@ -61,6 +61,10 @@
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", on ? "true" : "false");
     });
+    if (stage) {
+      if (key) stage.setAttribute("data-key", key);
+      else stage.removeAttribute("data-key");
+    }
     if (stageOpen && key) stageOpen.setAttribute("href", key + ".html");
   }
 
@@ -111,6 +115,7 @@
     if (!stage || stage.hidden) return;
     stage.hidden = true;
     stage.classList.remove("is-in");
+    stage.removeAttribute("data-key");
     if (window.history && history.replaceState) {
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }

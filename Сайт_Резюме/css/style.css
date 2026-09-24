@@ -21,6 +21,7 @@
   /* МОЗГ — акценты */
   --iris: #8052ff;
   --saffron: #ffb829;
+  --signal-red: #ff2f45;
   --verdant: #15846e;
 
   /* Типографика */
@@ -202,6 +203,14 @@ canvas[data-brain] {
   font-size: 24px; line-height: 1.17; color: #fff; margin: 0;
 }
 .deck--lead .deck__title { font-size: 24px; }
+/* Подсветка руководительской карточки — сигнальным красным */
+.deck--lead:hover {
+  box-shadow: rgba(216, 236, 248, 0.24) 0 1px 0 0 inset,
+    rgba(255, 47, 69, 0.16) 0 0 40px 0 inset,
+    rgba(255, 47, 69, 0.45) 0 0 0 1px inset,
+    0 0 34px -6px rgba(255, 47, 69, 0.55),
+    rgba(0, 0, 0, 0.65) 0 30px 70px;
+}
 .deck__facts { color: var(--moon-mist); font-size: 14.5px; flex: 1; }
 .deck__facts li { margin-bottom: 4px; }
 .deck__go {
@@ -239,7 +248,7 @@ canvas[data-brain] {
   font-size: 24px; color: #fff; line-height: 1.1;
 }
 .stat span { font-size: 12px; color: var(--fog-veil); }
-.stat--hot b { color: var(--saffron); }
+.stat--hot b { color: var(--accent, var(--saffron)); }
 
 /* ---------- Анимация прилёта карточек ---------- */
 @keyframes fly-left {
@@ -325,7 +334,7 @@ canvas[data-brain] {
 }
 .cv-hero .role-line {
   font-size: 15px; font-weight: 600; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--saffron);
+  text-transform: uppercase; color: var(--accent, var(--saffron));
   margin: 0 0 16px;
 }
 .cv-hero .lead { max-width: 780px; color: var(--frost-glow); font-size: 16.5px; margin: 0 0 22px; }
@@ -396,7 +405,7 @@ canvas[data-brain] {
   color: var(--fog-veil); margin-bottom: 6px;
 }
 .entry .role {
-  font-size: 14px; font-weight: 600; color: var(--saffron);
+  font-size: 14px; font-weight: 600; color: var(--accent, var(--saffron));
   letter-spacing: 0.04em; text-transform: uppercase;
   margin-bottom: 10px;
 }
@@ -456,7 +465,7 @@ canvas[data-brain] {
   background: linear-gradient(135deg, var(--iris), var(--verdant));
   box-shadow: rgba(128, 82, 255, 0.35) 0 0 14px;
 }
-.ladder .quote { color: var(--saffron); font-weight: 500; }
+.ladder .quote { color: var(--accent, var(--saffron)); font-weight: 500; }
 
 /* Боковая колонка */
 .cv-side { display: flex; flex-direction: column; gap: 24px; position: sticky; top: 20px; }
@@ -510,7 +519,7 @@ details.tech[open] summary { margin-bottom: 12px; }
   letter-spacing: 0.14em; color: var(--accent, var(--moon-mist)); opacity: 0.8;
 }
 .deck--sales { --accent: #a98bff; }
-.deck--lead  { --accent: #ffb829; }
+.deck--lead  { --accent: var(--signal-red); }
 .deck--proc  { --accent: #4fd6b4; }
 
 /* Активное окно: подсветка рамой и мягкое свечение акцентом */
@@ -586,6 +595,17 @@ details.tech[open] summary { margin-bottom: 12px; }
     rgba(186, 215, 247, 0.14) 0 0 0 1px inset, var(--halo);
   padding: 0 0 6px;
   overflow: hidden;
+}
+/* Подсветка полного резюме акцентом открытого окна — как у .deck.is-active */
+.stage[data-key="leader"]      { --accent: var(--signal-red); }
+.stage[data-key="sales"]       { --accent: #a98bff; }
+.stage[data-key="procurement"] { --accent: #4fd6b4; }
+.stage[data-key] .stage__glass {
+  box-shadow: rgba(216, 236, 248, 0.2) 0 1px 0 0 inset,
+    rgba(168, 201, 255, 0.14) 0 0 44px 0 inset,
+    var(--accent) 0 0 0 1px inset,
+    0 0 44px -8px var(--accent),
+    var(--halo);
 }
 .stage__glass .cv-hero, .stage__glass .cv-body, .stage__glass .legal { padding-left: 34px; padding-right: 34px; }
 .stage__glass .cv-body { padding-bottom: 6px; }

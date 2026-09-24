@@ -107,8 +107,12 @@
       if (distToSulci(nx, ny) < GAP) continue;
 
       var x = (nx - 0.5) * scale, y = (ny - 0.5) * scale;
+      var mang = Math.random() * Math.PI * 2;
+      var mrad = scale * 0.44 * Math.sqrt(Math.random());
       pts.push({
         hx: cx + x, hy: cy + y,
+        mx: cx + Math.cos(mang) * mrad,
+        my: cy + Math.sin(mang) * mrad,
         ax: cx + x + (Math.random() * 2 - 1) * w * 0.7,
         ay: cy + y + (Math.random() * 2 - 1) * h * 0.7,
         x: 0, y: 0, vx: 0, vy: 0,
@@ -137,7 +141,7 @@
       // но внутри силуэта их плотность и яркость выше.
       var depth = inBrain ? 0.7 : 0.28;
       pts.push({
-        hx: x, hy: y, ax: x, ay: y, x: x, y: y, vx: 0, vy: 0,
+        hx: x, hy: y, mx: x, my: y, ax: x, ay: y, x: x, y: y, vx: 0, vy: 0,
         rot: Math.random() * Math.PI * 2,
         spin: (Math.random() * 2 - 1) * 2,
         size: (inBrain ? 1.0 : 0.72) + Math.random() * (inBrain ? 1.25 : 0.8),
@@ -262,12 +266,19 @@
     function draw(now) {
       ctx.clearRect(0, 0, w, h);
 
+      var drift = now / 1000;
+      // Морфинг: мозг ⇄ сфера — медленный цикл, в точке перехода частицы разлетаются
+      var morph = Math.sin(drift * 0.32) * 0.5 + 0.5;
+      morph = morph * morph * (3 - 2 * morph);
+      var scatter = Math.sin(morph * Math.PI);
+
       // Мягкая подсветка силуэта — чтобы мозг «проявлялся» на чёрном
       var glow = ctx.createRadialGradient(cx - scale * 0.22, cy - scale * 0.26, scale * 0.08, cx, cy, scale * 1.05);
       glow.addColorStop(0, "rgba(128, 82, 255, 0.11)");
       glow.addColorStop(0.55, "rgba(21, 132, 110, 0.05)");
       glow.addColorStop(1, "rgba(128, 82, 255, 0)");
       ctx.fillStyle = glow;
+      ctx.globalAlpha = 1 - morph * 0.85;
       if (scaledPath) ctx.fill(scaledPath);
 
       // Еле заметный контур силуэта и линии борозд — «анатомия» мозга
@@ -279,10 +290,10 @@
         ctx.lineWidth = 0.9;
         for (var s = 0; s < scaledSulci.length; s++) ctx.stroke(scaledSulci[s]);
       }
+      ctx.globalAlpha = 1;
 
       var assembling = !reduce && !assembled && now - t0 < 3400;
       if (!reduce && !assembling) assembled = true; // сбор закончен — при ресайзе заново не «прилетаем»
-      var drift = now / 1000;
       drawConnections(now);
 
       for (var i = 0; i < particles.length; i++) {
@@ -301,6 +312,11 @@
           var swayY = Math.cos(drift * 0.13) * 2.4;
           var tx = p.hx + breathe + sway * (p.amb ? 2.4 : 1);
           var ty = p.hy + breathe * 0.55 + swayY * (p.amb ? 2.4 : 1);
+          if (!p.amb) {
+            // Морфинг в сферу и разлёт в момент перехода между формами
+            tx += (p.mx - p.hx) * morph + (p.hx - cx) * scatter * 0.3;
+            ty += (p.my - p.hy) * morph + (p.hy - cy) * scatter * 0.3;
+          }
           var sp = 0.012;
 
           if (!p.amb) {
@@ -320,7 +336,7 @@
           p.vy += (ty - p.y) * sp;
           p.vx *= 0.9; p.vy *= 0.9;
           p.x += p.vx; p.y += p.vy;
-          p.rot += p.spin * 0.0018;
+          p.rot += p.spin * (0.0018 + scatter * 0.012);
         }
 
         ctx.globalAlpha = p.alpha;
