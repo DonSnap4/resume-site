@@ -674,6 +674,14 @@ details.tech[open] { padding-bottom: 14px; }
 }
 
 
+/* ——— Интерактив: reveal-появление блоков ——— */
+.js-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.js-reveal.js-in { opacity: 1; transform: none; }
+
 /* ——— Кнопка «Скачать PDF» ——— */
 .cv-pdf { margin: 18px 0 4px; }
 .btn-pdf {
@@ -702,6 +710,8 @@ details.tech[open] { padding-bottom: 14px; }
 
   html, body { background: #fff !important; color: #14141c; }
   body { font-size: 10.5pt; line-height: 1.45; }
+  /* печать идёт сразу — непроскролленные блоки обязаны быть видны */
+  .js-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
 
   .cv-hero {
     padding: 0 0 10px; margin-bottom: 12px;

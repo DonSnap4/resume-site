@@ -158,6 +158,48 @@
     else if (stage && !stage.hidden) close();
   });
 
+  /* --- 5. Интерактив: копирование контактов, счётчики, появление блоков --- */
+  // телефон / почта / Telegram / MAX копируются по клику (текст ссылки)
+  document.querySelectorAll(".kv dd a").forEach(function (a) {
+    var href = a.getAttribute("href") || "";
+    if (href.indexOf("tel:") === 0 || href.indexOf("mailto:") === 0 ||
+        a.host.indexOf("t.me") >= 0 || a.host.indexOf("max.ru") >= 0) {
+      a.setAttribute("data-copy", a.textContent.trim());
+    }
+  });
+
+  function countUp(el) {
+    var m = el.textContent.match(/^(\d+)(.*)$/);
+    if (!m || reduce) return;
+    var target = parseInt(m[1], 10), suffix = m[2];
+    if (!target) return;
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var k = Math.min((ts - start) / 900, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3))) + suffix;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    el.textContent = "0" + suffix;
+    requestAnimationFrame(step);
+  }
+
+  // reveal-появление панелей/записей/счётчиков по мере прокрутки
+  if ("IntersectionObserver" in window && !reduce) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("js-in");
+        en.target.querySelectorAll(".numbers .stat b").forEach(countUp);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.18 });
+    document.querySelectorAll(".panel, .entry, .cv-hero").forEach(function (el) {
+      el.classList.add("js-reveal");
+      io.observe(el);
+    });
+  }
+
   bindCopy(document);
   if (stage && KEYS.indexOf(keyFromHash()) >= 0) open(keyFromHash());
 })();
