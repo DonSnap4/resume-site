@@ -83,7 +83,7 @@ canvas[data-brain] {
   position: fixed;
   inset: 0; width: 100%; height: 100%;
   z-index: 1; pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.42;
 }
 
 /* ---------- Верхняя панель ---------- */
@@ -153,7 +153,7 @@ canvas[data-brain] {
 
 /* ---------- Стеклянные карточки-окна ---------- */
 .decks {
-  display: grid; grid-template-columns: 1fr 1.25fr 1fr;
+  display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 24px; align-items: stretch; text-align: left;
 }
 @media (max-width: 940px) { .decks { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
@@ -202,7 +202,7 @@ canvas[data-brain] {
   font-family: var(--font-display); font-weight: 500;
   font-size: 24px; line-height: 1.17; color: #fff; margin: 0;
 }
-.deck--lead .deck__title { font-size: 30px; }
+.deck--lead .deck__title { font-size: 24px; }
 .deck__facts { color: var(--moon-mist); font-size: 14.5px; flex: 1; }
 .deck__facts li { margin-bottom: 4px; }
 .deck__go {
@@ -244,34 +244,61 @@ canvas[data-brain] {
 
 /* ---------- Анимация прилёта карточек ---------- */
 @keyframes fly-left {
-  from { opacity: 0; transform: translateX(-110vw) rotate(-9deg); filter: blur(20px); }
-  60%  { opacity: 1; filter: blur(0); }
-  to   { opacity: 1; transform: translateX(0) rotate(0); filter: blur(0); }
+  from { opacity: 0; transform: translate3d(-125vw, 6vh, 0) rotate(-14deg) scale(0.86); filter: blur(26px); }
+  65%  { opacity: 1; filter: blur(0); }
+  82%  { transform: translate3d(1.6vw, -0.6vh, 0) rotate(0.6deg) scale(1.012); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); filter: blur(0); }
 }
 @keyframes fly-top {
-  from { opacity: 0; transform: translateY(-90vh) scale(0.85); filter: blur(20px); }
-  60%  { opacity: 1; filter: blur(0); }
-  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  from { opacity: 0; transform: translate3d(0, -105vh, 0) rotate(3deg) scale(0.8); filter: blur(26px); }
+  65%  { opacity: 1; filter: blur(0); }
+  82%  { transform: translate3d(0, 1.2vh, 0) rotate(-0.4deg) scale(1.015); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); filter: blur(0); }
 }
 @keyframes fly-right {
-  from { opacity: 0; transform: translateX(110vw) rotate(9deg); filter: blur(20px); }
-  60%  { opacity: 1; filter: blur(0); }
-  to   { opacity: 1; transform: translateX(0) rotate(0); filter: blur(0); }
+  from { opacity: 0; transform: translate3d(125vw, 6vh, 0) rotate(14deg) scale(0.86); filter: blur(26px); }
+  65%  { opacity: 1; filter: blur(0); }
+  82%  { transform: translate3d(-1.6vw, -0.6vh, 0) rotate(-0.6deg) scale(1.012); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0) scale(1); filter: blur(0); }
 }
 @keyframes float-y {
   from { translate: 0 0; }
   to   { translate: 0 -8px; }
 }
 .deck.js-landed { opacity: 1; }
-.deck--sales.js-landed { animation: fly-left 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
-.deck--lead.js-landed  { animation: fly-top 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
-.deck--proc.js-landed  { animation: fly-right 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+/* Медленный, «весомый» прилёт: издалека, с блюром и лёгким наклоном */
+.deck--sales.js-landed { animation: fly-left 1.75s cubic-bezier(0.16, 1, 0.3, 1) 0.30s both; }
+.deck--lead.js-landed  { animation: fly-top 1.95s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both; }
+.deck--proc.js-landed  { animation: fly-right 1.75s cubic-bezier(0.16, 1, 0.3, 1) 1.20s both; }
 /* после прилёта — лёгкое парение */
-@keyframes float-final {
-  from { transform: translateY(-4px); }
-  to   { transform: translateY(4px); }
+/* «Плавание в воде»: очень медленное живое покачивание.
+   Используются индивидуальные свойства translate/rotate/scale — они не
+   конфликтуют с hover-transform карточки (подъём и наклон). */
+@keyframes drift-a {
+  0%   { translate: 0 0;        rotate: 0deg; }
+  20%  { translate: 6px -8px;   rotate: 0.35deg; }
+  45%  { translate: -3px -14px; rotate: -0.30deg; }
+  70%  { translate: -8px -6px;  rotate: 0.22deg; }
+  100% { translate: 0 0;        rotate: 0deg; }
 }
-.deck.js-settled { animation: float-final 5.5s ease-in-out 1.3s infinite alternate; }
+@keyframes drift-b {
+  0%   { translate: 0 0;        rotate: 0deg;   scale: 1; }
+  25%  { translate: -7px -6px;  rotate: -0.32deg; scale: 1.006; }
+  50%  { translate: 2px -15px;  rotate: 0.24deg; scale: 1.002; }
+  75%  { translate: 7px -5px;   rotate: -0.18deg; scale: 1.007; }
+  100% { translate: 0 0;        rotate: 0deg;   scale: 1; }
+}
+@keyframes drift-c {
+  0%   { translate: 0 0;        rotate: 0deg; }
+  30%  { translate: 5px -12px;  rotate: -0.28deg; }
+  55%  { translate: -6px -7px;  rotate: 0.30deg; }
+  80%  { translate: 3px -10px;  rotate: -0.12deg; }
+  100% { translate: 0 0;        rotate: 0deg; }
+}
+.deck.js-float { will-change: translate, rotate; }
+.deck--sales.js-float { animation: drift-a 21s ease-in-out infinite; }
+.deck--lead.js-float  { animation: drift-b 26s ease-in-out -4s infinite; }
+.deck--proc.js-float  { animation: drift-c 23s ease-in-out -9s infinite; }
 
 .footer {
   position: relative; z-index: 5;
@@ -472,5 +499,105 @@ details.tech[open] summary { margin-bottom: 12px; }
     transition-duration: 0.01ms !important;
   }
   .deck { opacity: 1 !important; }
+  .deck.js-float { animation: none !important; }
+}
+
+/* ============================================================
+   Выбор направления: номера окон, активное окно, сцена с резюме
+   ============================================================ */
+.deck__num {
+  position: absolute; top: 14px; right: 16px;
+  font-family: var(--font-mono); font-size: 12px;
+  letter-spacing: 0.14em; color: var(--accent, var(--moon-mist)); opacity: 0.8;
+}
+.deck--sales { --accent: #a98bff; }
+.deck--lead  { --accent: #ffb829; }
+.deck--proc  { --accent: #4fd6b4; }
+
+/* Активное окно: подсветка рамой и мягкое свечение акцентом */
+.deck.is-active {
+  border-color: var(--accent);
+  box-shadow: rgba(216, 236, 248, 0.24) 0 1px 0 0 inset,
+    rgba(168, 201, 255, 0.2) 0 0 40px 0 inset,
+    var(--accent) 0 0 0 1px inset,
+    0 0 34px -6px var(--accent),
+    rgba(0, 0, 0, 0.65) 0 26px 60px;
+}
+.deck__state { display: none; }
+.deck.is-active .deck__state {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent);
+}
+/* Переливание стекла при наведении — шире и заметнее */
+.deck::after { transform: translateX(-120%) rotate(6deg); }
+.deck:hover::after { transform: translateX(120%) rotate(6deg); }
+
+/* ---------- Сцена: полное стеклянное резюме под окнами ---------- */
+.stage {
+  position: relative; z-index: 6;
+  max-width: 1200px; margin: 0 auto;
+  padding: 8px 24px 56px;
+  scroll-margin-top: 10px;
+}
+.stage[hidden] { display: none; }
+.stage__bar {
+  position: sticky; top: 0; z-index: 12;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 12px 16px; margin: 0 0 18px;
+  border-radius: var(--r-card);
+  background: rgba(11, 16, 32, 0.74);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: rgba(216, 236, 248, 0.16) 0 1px 0 0 inset,
+    rgba(186, 215, 247, 0.14) 0 0 0 1px inset,
+    rgba(0, 0, 0, 0.55) 0 14px 34px;
+}
+.stage__tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab {
+  font: inherit; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--moon-mist); cursor: pointer;
+  padding: 9px 16px; border: 0; border-radius: var(--r-pill);
+  background: var(--lum-fill); box-shadow: var(--shadow-subtle);
+  transition: color 0.2s, background 0.3s, box-shadow 0.3s;
+}
+.tab:hover { color: #fff; background: #bad6f71f; }
+.tab.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--void-violet), var(--verdant));
+  box-shadow: 0 0 24px rgba(102, 58, 243, 0.45);
+}
+.stage__actions { display: flex; align-items: center; gap: 16px; }
+.stage__link, .stage__close {
+  font: inherit; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--moon-mist); background: none; border: 0;
+  cursor: pointer; padding: 6px 2px;
+}
+.stage__link:hover, .stage__close:hover { color: #fff; text-decoration: underline; }
+
+.stage__glass {
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(128, 82, 255, 0.07) 45%, rgba(21, 132, 110, 0.1)),
+    rgba(16, 24, 42, 0.68);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  box-shadow: rgba(216, 236, 248, 0.2) 0 1px 0 0 inset,
+    rgba(168, 201, 255, 0.14) 0 0 44px 0 inset,
+    rgba(186, 215, 247, 0.14) 0 0 0 1px inset, var(--halo);
+  padding: 0 0 6px;
+  overflow: hidden;
+}
+.stage__glass .cv-hero, .stage__glass .cv-body, .stage__glass .legal { padding-left: 34px; padding-right: 34px; }
+.stage__glass .cv-body { padding-bottom: 6px; }
+.stage__glass .legal { padding-bottom: 20px; }
+@media (max-width: 640px) {
+  .stage__glass .cv-hero, .stage__glass .cv-body, .stage__glass .legal { padding-left: 18px; padding-right: 18px; }
+}
+.stage.is-loading .stage__glass { opacity: 0.4; }
+.stage.is-in .stage__glass { animation: stage-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
