@@ -156,7 +156,11 @@ canvas[data-brain] {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 24px; align-items: stretch; text-align: left;
 }
-@media (max-width: 940px) { .decks { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+@media (max-width: 940px) {
+  .decks { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  /* На смартфоне руководитель — первым (на десктопе он в центре-пьедестале) */
+  .deck--lead { order: -1; }
+}
 
 .deck {
   position: relative;
@@ -487,10 +491,36 @@ canvas[data-brain] {
 .legal p { font-size: 13.5px; color: var(--fog-veil); margin: 0; }
 .legal b { color: var(--moon-mist); }
 
-details.tech summary {
-  cursor: pointer; color: var(--moon-mist); font-size: 14.5px;
+/* Аккордеон «Производственный и ранний опыт» — заметная кнопка-пилюля */
+details.tech {
+  border: 1px solid rgba(216, 236, 248, 0.22);
+  border-radius: var(--r-card);
+  background: rgba(20, 29, 48, 0.55);
+  padding: 4px 20px 8px;
 }
-details.tech[open] summary { margin-bottom: 12px; }
+details.tech summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px 0;
+  color: #fff; font-size: 15px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+details.tech summary::-webkit-details-marker { display: none; }
+details.tech summary::after {
+  content: "▸";
+  color: var(--accent, var(--saffron));
+  font-size: 20px; line-height: 1;
+  transition: transform 0.25s;
+}
+details.tech[open] summary::after { transform: rotate(90deg); }
+details.tech summary:hover { color: var(--accent, var(--saffron)); }
+details.tech[open] summary { margin-bottom: 10px; }
+details.tech[open] { padding-bottom: 14px; }
+@media (max-width: 640px) {
+  details.tech summary { font-size: 16px; padding: 18px 0; }
+}
 
 /* Появление контента страницы */
 @keyframes fade-up {
@@ -618,5 +648,28 @@ details.tech[open] summary { margin-bottom: 12px; }
 @keyframes stage-in {
   from { opacity: 0; transform: translateY(28px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================
+   Смартфон: шапка, навигация, сцена
+   ============================================================ */
+@media (max-width: 640px) {
+  .topbar { padding: 14px 16px; gap: 10px; }
+  .brand__name { font-size: 15px; }
+  .nav { gap: 14px; }
+  .nav a { font-size: 12.5px; }
+  .btn-cta { padding: 8px 14px; font-size: 13px; }
+
+  .hero { padding: 34px 16px 28px; }
+  .hero .lead { font-size: 15.5px; }
+  .hero .sub { margin-bottom: 30px; }
+  .deck { padding: 20px; }
+
+  .cv-hero { padding: 26px 16px 8px; }
+
+  /* Сцена: табы и действия переносятся, не ломают шапку */
+  .stage__bar { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px 16px; }
+  .stage__tabs { justify-content: center; }
+  .stage__actions { justify-content: center; flex-wrap: wrap; }
 }
 
