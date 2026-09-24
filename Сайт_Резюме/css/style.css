@@ -168,6 +168,11 @@ li { margin: 0 0 6px; }
     rgba(186, 215, 247, 0.12) 0 0 0 1px inset, var(--halo);
   padding: 24px;
   overflow: hidden;
+  border: 1px solid rgba(216, 236, 248, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(128,82,255,0.06) 45%, rgba(21,132,110,0.10)),
+    rgba(20, 29, 48, 0.62);
+  opacity: 1;
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.35s, background 0.35s;
   opacity: 0; /* до прилёта */

@@ -21,19 +21,15 @@
       var nx = x / scale, ny = y / scale;
       var ok = false;
 
-      // Основное полушарие: эллипс
-      var inMain = (nx * nx) / (1.0 * 1.0) + (ny * ny) / (0.78 * 0.78) <= 1;
-      if (inMain) {
-        // Вырезаем «извилины» — волнистые каналы, чтобы силуэт читался как мозг
-        var wave = Math.sin(x / scale * 9.0) * 0.055 + Math.sin(y / scale * 7.0 + 1.3) * 0.05;
-        var r = Math.sqrt((nx * nx) + (ny * ny));
-        if (r > 0.28 + wave && r < 0.86 + wave * 0.5) ok = true;
-      }
-      // Мозжечок: маленький эллипс снизу сзади
-      if (!ok) {
-        var bx = nx + 0.42, by = ny - 0.52;
-        if ((bx * bx) / (0.30 * 0.30) + (by * by) / (0.24 * 0.24) <= 1) ok = true;
-      }
+      // Заполненный силуэт мозга: два округлых полушария, мозжечок и ствол.
+      var lobeA = (nx * nx) / (0.82 * 0.82) + ((ny + 0.08) * (ny + 0.08)) / (0.68 * 0.68) <= 1;
+      var lobeB = ((nx + 0.42) * (nx + 0.42)) / (0.58 * 0.58) + ((ny + 0.12) * (ny + 0.12)) / (0.62 * 0.62) <= 1;
+      var lobeC = ((nx - 0.42) * (nx - 0.42)) / (0.58 * 0.58) + ((ny + 0.12) * (ny + 0.12)) / (0.62 * 0.62) <= 1;
+      var stem = nx > 0.10 && nx < 0.42 && ny > 0.42 && ny < 0.92;
+      var cerebellum = ((nx - 0.42) * (nx - 0.42)) / (0.28 * 0.28) + ((ny - 0.52) * (ny - 0.52)) / (0.22 * 0.22) <= 1;
+      var gyri = Math.sin(nx * 12) + Math.cos(ny * 10 + nx * 4);
+      var ok = lobeA || lobeB || lobeC || stem || cerebellum;
+      if (ok && gyri < -0.35) ok = false;
       if (ok) {
         pts.push({
           hx: cx + x, hy: cy + y,
