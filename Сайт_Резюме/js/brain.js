@@ -1,6 +1,8 @@
-/* Фоновые частицы сайта: спокойный дрейф по всему экрану,
-   отталкивание от курсора, резкий разлёт по клику на кнопки
-   с возвратом на место. Без геометрических фигур — только фон. */
+/* Фоновые частицы сайта — плотное поле по всему экрану.
+   Тихий дрейф + паутинка; отталкивание от курсора;
+   клик по кнопкам/карточкам — РЕЗКИЙ разлёт на большое
+   расстояние с последующим сбором обратно (пружина).
+   Частицы яркие, с послесвечением в момент разлёта. */
 (function () {
   "use strict";
 
@@ -11,35 +13,38 @@
 
   var w = 0, h = 0, dpr = 1;
   var parts = [];
-  var mouse = { x: -9999, y: -9999, r: 150 };
+  var mouse = { x: -9999, y: -9999, r: 170 };
 
   var PALETTE = [
     [186, 215, 247], // ice
     [168, 201, 255], // sky
     [128, 82, 255],  // violet
     [79, 214, 180],  // verdant
-    [255, 47, 69]    // signal-red — редкие «искры»
+    [255, 47, 69]    // signal-red
   ];
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
 
   function makeParticles() {
-    var count = Math.min(150, Math.max(60, Math.round((w * h) / 14000)));
+    // Плотно: ~1 частица на 6000 px² экрана, 120…340 штук
+    var count = Math.min(340, Math.max(120, Math.round((w * h) / 6000)));
     parts = [];
     for (var i = 0; i < count; i++) {
-      // 85% — приглушённый лёд, 10% — цветные, 5% — красные искры
       var roll = Math.random();
-      var c = roll < 0.85 ? PALETTE[0] : (roll < 0.95 ? PALETTE[1 + ((Math.random() * 3) | 0)] : PALETTE[4]);
+      var c = roll < 0.82 ? PALETTE[0]
+            : roll < 0.94 ? PALETTE[1 + ((Math.random() * 3) | 0)]
+            : PALETTE[4];
       var hx = rnd(0, w), hy = rnd(0, h);
       parts.push({
-        hx: hx, hy: hy,             // домашняя позиция
-        x: hx, y: hy, vx: 0, vy: 0, // текущая
-        r: rnd(0.7, 2.3),
-        a: rnd(0.18, 0.6),
+        hx: hx, hy: hy,
+        x: hx, y: hy, vx: 0, vy: 0,
+        r: rnd(0.8, 2.6),
+        a: rnd(0.22, 0.7),
         c: c,
-        ph: rnd(0, Math.PI * 2),    // фаза дрейфа
-        sp: rnd(0.15, 0.45),        // скорость дрейфа
-        amp: rnd(6, 22)             // амплитуда дрейфа
+        ph: rnd(0, Math.PI * 2),
+        sp: rnd(0.12, 0.4),
+        amp: rnd(8, 26),
+        glow: 0 // послесвечение после разлёта
       });
     }
   }
@@ -68,20 +73,25 @@
     ctx.globalAlpha = 1;
   }
 
-  /* Резкий разлёт от точки: импульс каждому частице, дальше
-     пружинный возврат к домашней позиции («слетались» обратно). */
+
+  /* РЕЗКИЙ разлёт: чем ближе к точке клика, тем злее импульс
+     (до ~125 px/кадр — через пол-экрана), плюс случайный разброс.
+     Дальше пружина собирает обратно к домашним точкам. */
   function burst(bx, by) {
+    var diag = Math.sqrt(w * w + h * h) || 1;
     for (var i = 0; i < parts.length; i++) {
       var p = parts[i];
       var dx = p.x - bx, dy = p.y - by;
       var d = Math.sqrt(dx * dx + dy * dy) || 1;
-      var force = 14 * (1 - Math.min(d, 700) / 700) + 3;
-      p.vx += (dx / d) * force + rnd(-2.5, 2.5);
-      p.vy += (dy / d) * force + rnd(-2.5, 2.5);
+      var falloff = 1 - Math.min(d / diag, 1) * 0.75;
+      var force = rnd(55, 125) * falloff;
+      p.vx += (dx / d) * force + rnd(-18, 18);
+      p.vy += (dy / d) * force + rnd(-18, 18);
+      p.glow = 1; // вспыхивают на время полёта
     }
   }
 
-  // Клики по кнопкам/карточкам/ссылкам — триггер разлёта
+  // Клики по кнопкам/карточкам/ссылкам/вкладкам — триггер разлёта
   document.addEventListener("click", function (e) {
     if (reduce) return;
     var t = e.target;
@@ -108,20 +118,21 @@
     var dt = Math.min((now - last) / 1000, 0.05) || 0.016;
     last = now;
     var t = now / 1000;
+    var f = dt * 60; // нормировка к 60fps
 
     ctx.clearRect(0, 0, w, h);
 
-    // связи между соседями — только фоновая паутинка, очень слабая
+    // паутинка между соседями — тонкая, бледная
     ctx.lineWidth = 0.6;
+    ctx.strokeStyle = "rgb(186,215,247)";
     for (var i = 0; i < parts.length; i++) {
       var a = parts[i];
       for (var j = i + 1; j < parts.length; j++) {
         var b = parts[j];
         var ddx = a.x - b.x, ddy = a.y - b.y;
         var d2 = ddx * ddx + ddy * ddy;
-        if (d2 < 110 * 110) {
-          ctx.globalAlpha = (1 - Math.sqrt(d2) / 110) * 0.09;
-          ctx.strokeStyle = "rgb(186,215,247)";
+        if (d2 < 105 * 105) {
+          ctx.globalAlpha = (1 - Math.sqrt(d2) / 105) * 0.08;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -134,32 +145,52 @@
       var p = parts[k];
 
       if (!reduce) {
-        // тихий дрейф вокруг домашней точки
         var tx = p.hx + Math.cos(t * p.sp + p.ph) * p.amp;
         var ty = p.hy + Math.sin(t * p.sp * 0.8 + p.ph) * p.amp;
-        p.vx += (tx - p.x) * 0.9 * dt;   // возврат-пружина
-        p.vy += (ty - p.y) * 0.9 * dt;
 
-        // отталкивание от курсора (как было)
+        if (p.glow > 0.05) {
+          // фаза полёта: слабая пружина (даём улететь), гасим свечение
+          p.vx += (tx - p.x) * 0.55 * dt;
+          p.vy += (ty - p.y) * 0.55 * dt;
+          p.vx *= Math.pow(0.975, f);
+          p.vy *= Math.pow(0.975, f);
+          p.glow *= Math.pow(0.97, f);
+        } else {
+          // обычный режим: тихий дрейф у дома
+          p.vx += (tx - p.x) * 4.2 * dt;
+          p.vy += (ty - p.y) * 4.2 * dt;
+          p.vx *= Math.pow(0.87, f);
+          p.vy *= Math.pow(0.87, f);
+          p.glow = 0;
+        }
+
+        // отталкивание от курсора
         var mdx = p.x - mouse.x, mdy = p.y - mouse.y;
         var md2 = mdx * mdx + mdy * mdy;
         if (md2 < mouse.r * mouse.r && md2 > 0.01) {
           var md = Math.sqrt(md2);
-          var push = (1 - md / mouse.r) * 4.2;
-          p.vx += (mdx / md) * push * dt * 60 * 0.08;
-          p.vy += (mdy / md) * push * dt * 60 * 0.08;
+          var push = (1 - md / mouse.r) * 9;
+          p.vx += (mdx / md) * push * f * 0.1;
+          p.vy += (mdy / md) * push * f * 0.1;
         }
 
-        p.vx *= Math.pow(0.86, dt * 60); // затухание
-        p.vy *= Math.pow(0.86, dt * 60);
-        p.x += p.vx * dt * 60;
-        p.y += p.vy * dt * 60;
+        p.x += p.vx * f;
+        p.y += p.vy * f;
       }
 
-      ctx.globalAlpha = p.a;
+      var lit = p.glow > 0.05;
+      if (lit) { // послесвечение в полёте
+        ctx.globalAlpha = 0.16 * p.glow;
+        ctx.fillStyle = "rgb(" + p.c[0] + "," + p.c[1] + "," + p.c[2] + ")";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 5 * p.glow + p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = Math.min(1, p.a + p.glow * 0.5);
       ctx.fillStyle = "rgb(" + p.c[0] + "," + p.c[1] + "," + p.c[2] + ")";
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.r * (1 + p.glow * 0.9), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -179,3 +210,4 @@
     requestAnimationFrame(frame);
   }
 })();
+
