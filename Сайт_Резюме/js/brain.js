@@ -125,25 +125,26 @@
     return pts;
   }
 
-  /* ---------- Редкие частицы вокруг мозга (амбиентный слой) ---------- */
+  /* ---------- Фоновая нейросеть: узлы по всему экрану ---------- */
   function makeAmbient(probe, path, scale, cx, cy, w, h, count) {
     var pts = [], tries = 0;
-    while (pts.length < count && tries < count * 60) {
+    while (pts.length < count && tries < count * 80) {
       tries++;
       var x = Math.random() * w, y = Math.random() * h;
       var nx = (x - cx) / scale + 0.5, ny = (y - cy) / scale + 0.5;
-      // держим их по сторонам от мозга: не внутри и не вплотную к силуэту
-      if (nx > -0.16 && nx < 1.16 && ny > -0.16 && ny < 1.16) continue;
-      if (probe.isPointInPath(path, nx, ny)) continue;
+      var inBrain = probe.isPointInPath(path, nx, ny);
+      // Частицы есть и вокруг, и внутри мозга: форма возникает из общей материи,
+      // но внутри силуэта их плотность и яркость выше.
+      var depth = inBrain ? 0.7 : 0.28;
       pts.push({
         hx: x, hy: y, ax: x, ay: y, x: x, y: y, vx: 0, vy: 0,
         rot: Math.random() * Math.PI * 2,
         spin: (Math.random() * 2 - 1) * 2,
-        size: 0.9 + Math.random() * 1.1,
-        alpha: 0.13 + Math.random() * 0.2,
+        size: (inBrain ? 1.0 : 0.72) + Math.random() * (inBrain ? 1.25 : 0.8),
+        alpha: (inBrain ? 0.34 : 0.10) + Math.random() * (inBrain ? 0.45 : 0.22),
         color: PALETTE[(Math.random() * PALETTE.length) | 0],
         phase: Math.random() * Math.PI * 2,
-        delay: 0,
+        depth: depth,
         amb: true
       });
     }
@@ -177,7 +178,7 @@
 
       var area = w * h;
       var brainCount = Math.round(Math.min(1800, Math.max(760, area / 900)));
-      var ambCount = Math.round(Math.min(220, Math.max(60, area / 11000)));
+      var ambCount = Math.round(Math.min(900, Math.max(260, area / 2400)));
 
       particles = makeBrainPoints(path, probe, scale, cx, cy, w, h, brainCount)
         .concat(makeAmbient(probe, path, scale, cx, cy, w, h, ambCount));
@@ -231,6 +232,33 @@
       ctx.stroke();
     }
 
+    function drawConnections(now) {
+      // Dala: поле — это не просто точки, а живая нейросеть.
+      // Рисуем только короткие связи, поэтому полноэкранный слой остаётся лёгким.
+      ctx.lineWidth = 0.65;
+      for (var i = 0; i < particles.length; i++) {
+        var a = particles[i];
+        if (!a.amb) continue;
+        for (var j = i + 1; j < particles.length; j++) {
+          var b = particles[j];
+          if (!b.amb) continue;
+          var dx = a.x - b.x, dy = a.y - b.y;
+          var d2 = dx * dx + dy * dy;
+          if (d2 > 10800) continue; // не соединяем весь экран в паутину
+          var d = Math.sqrt(d2);
+          var strength = (1 - d / 104) * 0.18;
+          var pulse = 0.72 + Math.sin(now / 900 + a.phase + b.phase) * 0.28;
+          ctx.globalAlpha = strength * pulse;
+          ctx.strokeStyle = a.color;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
     function draw(now) {
       ctx.clearRect(0, 0, w, h);
 
@@ -255,6 +283,7 @@
       var assembling = !reduce && !assembled && now - t0 < 3400;
       if (!reduce && !assembling) assembled = true; // сбор закончен — при ресайзе заново не «прилетаем»
       var drift = now / 1000;
+      drawConnections(now);
 
       for (var i = 0; i < particles.length; i++) {
         var p = particles[i];

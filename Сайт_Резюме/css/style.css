@@ -65,9 +65,9 @@ li { margin: 0 0 6px; }
 .grid-bg {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
-    linear-gradient(rgba(186, 215, 247, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(186, 215, 247, 0.06) 1px, transparent 1px);
-  background-size: 88px 88px;
+    linear-gradient(rgba(186, 215, 247, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 215, 247, 0.025) 1px, transparent 1px);
+  background-size: 120px 120px;
   -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
   mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
 }
@@ -80,10 +80,9 @@ li { margin: 0 0 6px; }
 
 /* ---------- Мозг из осколков (МОЗГ) ---------- */
 canvas[data-brain] {
-  position: fixed;
-  inset: 0; width: 100%; height: 100%;
+  position: fixed; inset: 0; width: 100%; height: 100%;
   z-index: 1; pointer-events: none;
-  opacity: 0.42;
+  opacity: 0.86;
 }
 
 /* ---------- Верхняя панель ---------- */
