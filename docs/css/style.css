@@ -308,9 +308,9 @@ canvas[data-brain] {
   100% { translate: 0 0;        rotate: 0deg; }
 }
 .deck.js-float { will-change: translate, rotate; }
-.deck--sales.js-float { animation: drift-a 21s ease-in-out infinite; }
-.deck--lead.js-float  { animation: drift-b 26s ease-in-out -4s infinite; }
-.deck--proc.js-float  { animation: drift-c 23s ease-in-out -9s infinite; }
+.deck--sales.js-float { animation: drift-a 14s ease-in-out infinite; }
+.deck--lead.js-float  { animation: drift-b 17s ease-in-out -4s infinite; }
+.deck--proc.js-float  { animation: drift-c 15s ease-in-out -9s infinite; }
 
 .footer {
   position: relative; z-index: 5;
