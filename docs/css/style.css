@@ -673,3 +673,69 @@ details.tech[open] { padding-bottom: 14px; }
   .stage__actions { justify-content: center; flex-wrap: wrap; }
 }
 
+
+/* ——— Кнопка «Скачать PDF» ——— */
+.cv-pdf { margin: 18px 0 4px; }
+.btn-pdf {
+  display: inline-block; cursor: pointer;
+  background: transparent; color: var(--void-violet);
+  border: 1.5px solid var(--void-violet);
+  font: 600 14px/1 inherit; letter-spacing: 0.03em;
+  padding: 12px 22px; border-radius: var(--r-pill);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+.btn-pdf:hover, .btn-pdf:focus-visible {
+  background: var(--void-violet); color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(102, 58, 243, 0.5);
+}
+.btn-pdf::before { content: "↓ "; font-weight: 700; }
+
+/* ——— Печать / Сохранение в PDF: A4 ——— */
+@page { size: A4; margin: 13mm 12mm; }
+
+@media print {
+  /* всё экранное — прочь, остаётся чистое резюме */
+  .topbar, .nav, .footer, .btn-cta, .btn-pdf, .cv-pdf,
+  canvas[data-brain], .stage__tabs, .stage__actions,
+  .hero .sub, .back, .no-print { display: none !important; }
+
+  html, body { background: #fff !important; color: #14141c; }
+  body { font-size: 10.5pt; line-height: 1.45; }
+
+  .cv-hero {
+    padding: 0 0 10px; margin-bottom: 12px;
+    border-bottom: 2px solid var(--void-violet);
+    border-radius: 0 !important;
+    background: none !important; box-shadow: none !important;
+  }
+  .cv-hero h1 { font-size: 20pt; color: #14141c; }
+  .cv-hero .lead { font-size: 10pt; color: #33333f; }
+  .eyebrow, .role-line { color: var(--void-violet); }
+  .numbers { gap: 8px; }
+  .stat, .chip, .panel, .entry {
+    background: #fff !important; color: #14141c !important;
+    border: 1px solid #d9d9e3 !important;
+    box-shadow: none !important; border-radius: 6px !important;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .chip { border-radius: 999px !important; }
+  .stat b, h1, h2, h3 { color: #14141c !important; }
+  h2 { border-bottom: 1px solid #d9d9e3; padding-bottom: 4px; }
+  a { color: #14141c !important; text-decoration: none; }
+
+  .cv-body { display: block; padding: 0; background: none; }
+  .cv-main, .cv-side { width: 100%; }
+  .panel { margin-bottom: 10px; padding: 10px 12px; }
+  .entry { margin-bottom: 8px; padding: 8px 10px; }
+  .entry ul { margin: 4px 0 0; padding-left: 16px; }
+  .entry li { margin-bottom: 2px; }
+
+  .stage__glass {
+    background: none !important; backdrop-filter: none !important;
+    border: none !important; box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .deck { background: none !important; box-shadow: none !important; padding: 0; }
+}
+
