@@ -477,7 +477,22 @@ canvas[data-brain] {
 .kv { display: grid; grid-template-columns: 118px 1fr; gap: 8px 12px; font-size: 14.5px; margin: 0; }
 .kv dt { color: var(--fog-veil); }
 .kv dd { margin: 0; color: var(--frost-glow); word-break: break-word; }
+.kv a { display: inline-flex; align-items: baseline; gap: 7px; transition: color 0.2s; }
+.kv a .kv-i {
+  width: 15px; height: 15px; flex: none;
+  align-self: center;
+  color: var(--void-violet);
+  opacity: 0.9;
+  transition: transform 0.2s, color 0.2s, filter 0.2s;
+}
 .kv a:hover { color: #fff; text-decoration: underline; }
+.kv a:hover .kv-i {
+  color: #fff; transform: translateY(-1px);
+  filter: drop-shadow(0 0 6px rgba(102, 58, 243, 0.9));
+}
+@media print {
+  .kv a .kv-i { color: #663af3 !important; filter: none !important; }
+}
 .panel .btn-cta { margin-top: 4px; text-align: center; }
 
 /* Юридический блок */
