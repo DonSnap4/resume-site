@@ -15,12 +15,12 @@
   var parts = [];
   var mouse = { x: -9999, y: -9999, r: 170 };
 
+  /* Три цвета резюме: руководитель — красный, закупки — зелёный,
+     продажи — фиолетовый. Равномерное распределение. */
   var PALETTE = [
-    [186, 215, 247], // ice
-    [168, 201, 255], // sky
-    [128, 82, 255],  // violet
-    [79, 214, 180],  // verdant
-    [255, 47, 69]    // signal-red
+    [255, 47, 69],   // signal-red  — руководитель
+    [21, 132, 110],  // verdant     — закупки
+    [128, 82, 255]   // iris        — продажи
   ];
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
@@ -30,10 +30,7 @@
     var count = Math.min(340, Math.max(120, Math.round((w * h) / 6000)));
     parts = [];
     for (var i = 0; i < count; i++) {
-      var roll = Math.random();
-      var c = roll < 0.82 ? PALETTE[0]
-            : roll < 0.94 ? PALETTE[1 + ((Math.random() * 3) | 0)]
-            : PALETTE[4];
+      var c = PALETTE[i % 3]; // равномерно: красный / зелёный / фиолетовый
       var hx = rnd(0, w), hy = rnd(0, h);
       parts.push({
         hx: hx, hy: hy,
